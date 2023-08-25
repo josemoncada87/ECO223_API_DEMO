@@ -14,6 +14,24 @@ app.use(express.urlencoded({ extended: true }));
 // New list for items storage (only ram memory)
 let items = []
 
+let users = [
+  {
+    "name":"Jose",
+    last:"Moncada",
+    email:"jamoncada@icesi.edu.co"
+  },
+  {
+    name:"Pepito",
+    last:"Perez",
+    email:"pperez@icesi.edu.co"
+  },
+  {
+    name:"Ana",
+    last:"Frank",
+    email:"afrank@icesi.edu.co"
+  },
+]
+
 // 📤 Endpoint for obtain all items
 app.get('/items', (req, res) => {  
   res.send({"items":items})
@@ -38,6 +56,10 @@ app.post('/items', (req, res) => {
 
 app.get('/', (req, res) => {    
   res.send('Server started')
+})
+
+app.get('/users', (req, res) => {
+  res.send({"users":users})
 })
 
 app.post('/clear', (req, res) => {    

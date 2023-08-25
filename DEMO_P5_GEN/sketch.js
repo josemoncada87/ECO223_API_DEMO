@@ -70,14 +70,15 @@ function mousePressed(){
     }
   }).catch(error => {
     console.error('Error:', error);
-  });
+  }); 
+
 }
 
 // Function to perform a POST request
 async function postNewItem(data) {
   try {
     // Request for posting on server
-    const response = await fetch(apiUrlForPost, {
+    const response = await fetch( "http://127.0.0.1:3000/items", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
