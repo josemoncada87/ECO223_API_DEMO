@@ -3,12 +3,18 @@ const app = express()
 const port = 3000
 
 // Use Json middleware
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-let users = []
+//const cors = require('cors'); 
+//app.use(cors())
 
+
+
+const {validateUser} = require('./schemas/users')
+
+// Esto no es REST pero mientras tantillo
+let users = []
 users.push({
     name: "Pepito",
     last: "Perez",
@@ -42,15 +48,25 @@ app.get('/users', (req, res)=>{
 })
 
 app.post('/users', (req, res) => {
-    let newUser = {
-        name:req.body.name,
-        last:req.body.last,
-        age:req.body.age,
-        id:req.body.id,
-        email:req.body.email
+
+    const userValidationResult = validateUser(req.body)    
+    console.log("result", userValidationResult.error)
+
+    if(userValidationResult.error){
+        return res.status(400).send(
+            {message:JSON.parse(userValidationResult.error.message)}
+        )
     }
-    users.push(newUser)
-    res.send("¡Creación de usuario exitosa!")
+
+    let newUser = {
+        name:userValidationResult.data.name,
+        last:userValidationResult.data.last,
+        age:userValidationResult.data.age,
+        id:userValidationResult.data.id,
+        email:userValidationResult.data.email
+    }
+    users.push(newUser)    
+    res.status(201).send({"message":"Creación Exitosa!", "user":newUser})
 })
 
 app.get('/', (req, res)=>{
@@ -81,15 +97,32 @@ app.put('/users/:id',(req, res)=>{
 app.patch('/users/:id', (req, res)=>{
     let index = users.findIndex(user => user.id == req.params.id)
 
-    users[index].name = req.body.name || users[index].name
-    users[index].last = req.body.last || users[index].last
-    users[index].age = req.body.age || users[index].age
-    users[index].email = req.body.email || users[index].email
+    /* A pie 🦶*/
+    //users[index].name = req.body.name || users[index].name
+    //users[index].last = req.body.last || users[index].last
+    //users[index].age = req.body.age || users[index].age
+    //users[index].email = req.body.email || users[index].email
 
-    res.send("usuario modificado ")
+    /* Para generalizarlo ⭐*/
+    if (index !== -1) {
+        // Obtén las claves del cuerpo de la solicitud
+        const requestKeys = Object.keys(req.body);
+        // Itera sobre las claves y verifica si existen en el objeto
+        requestKeys.forEach(key => {
+            if (users[index][key] !== undefined) {
+                users[index][key] = req.body[key];
+            }
+        });
+        res.send("Usuario modificado para las claves: " + requestKeys.join(', '));
+    } else {
+        res.status(404).send("Usuario no encontrado");
+    }
+});
+
+app.use("", (req, res)=>{
+    res.status(404).send("No encontramos el recurso solicitado")
 })
-
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
-  })
+})
